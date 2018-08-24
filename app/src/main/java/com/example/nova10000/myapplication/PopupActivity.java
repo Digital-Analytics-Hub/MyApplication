@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 /*
  *
- *  subcj. view popup
+ *  subcj. product purchase popup activity
  *  maker. ray na
  *  group. da-hub
  *  dates. 2018. 08. 23.
@@ -26,73 +26,76 @@ import java.util.ArrayList;
 
 public class PopupActivity extends Activity {
 
-    // 1. Create Firebase Analytics Member Variables
-    private FirebaseAnalytics mFirebase;
-    private Bundle mParam;
-    private Bundle ecommerceBundle;
+    private TextView mProduct_name;
+    private TextView mProduct_price;
 
-    // 2. Product Infomation
-    private TextView product_name;
-    private TextView product_price;
+    // 1. Create Firebase Analytics Member Variables
+    private FirebaseAnalytics mFirebaseAnalytics;
+    private Bundle mParam;
+    private Bundle mEcommerceBundle;
 
     @Override
     protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
-
-        // Remove Title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_popup);
 
-        product_name = (TextView)findViewById(R.id.product_name);
-        product_price = (TextView)findViewById(R.id.product_price);
+        mProduct_name = (TextView)findViewById(R.id.product_name);
+        mProduct_price = (TextView)findViewById(R.id.product_price);
 
-        // Define product with relevant parameters
+        // 2. Constructor Set up
         mParam = new Bundle();
 
-        mParam.putString( FirebaseAnalytics.Param.ITEM_ID, "001");  // ITEM_ID or ITEM_NAME is required
-        mParam.putString( FirebaseAnalytics.Param.ITEM_NAME, product_name.getText().toString());
-        mParam.putString( FirebaseAnalytics.Param.ITEM_CATEGORY, "Software/Analytics Tool");
-        //               mParam.putString( FirebaseAnalytics.Param.ITEM_VARIANT, "Blue");
-        mParam.putString( FirebaseAnalytics.Param.ITEM_BRAND, "Google");
-        mParam.putDouble( FirebaseAnalytics.Param.PRICE, 100000 );
-        mParam.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" );
+        // 3. Define Product Information
+        mParam.putString( FirebaseAnalytics.Param.ITEM_NAME, "Cart" + mProduct_name.getText().toString()); // Custom Name
+        mParam.putString( FirebaseAnalytics.Param.ITEM_CATEGORY, "Software/Analytics Tool"); // Product Category
+        mParam.putString( FirebaseAnalytics.Param.ITEM_BRAND, "Google"); // Product Brand
+        mParam.putDouble( FirebaseAnalytics.Param.PRICE, 100000 ); // Product Price
+        mParam.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" ); // Product Currency
 
-        // Prepare ecommerce bundle
-        ecommerceBundle = new Bundle();
-        ecommerceBundle.putBundle( "HotProduct", mParam );
+        // 4. Prepare Ecommerce
+        mEcommerceBundle = new Bundle();
+        mEcommerceBundle.putBundle( "HotProduct", mParam );
 
-        // Log view_item event with ecommerce bundle
-        mFirebase = FirebaseAnalytics.getInstance(this);
-        mFirebase.logEvent( FirebaseAnalytics.Event.VIEW_ITEM, ecommerceBundle );
+        // 5. Record View Item Event
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.logEvent( FirebaseAnalytics.Event.VIEW_ITEM, mEcommerceBundle );
     }
 
+    // 6. Click Event Listener & Product Purchase
     public void onPurchase(View v) {
-
         switch (v.getId()) {
             case R.id.myPurchase :
-                mParam.putString( FirebaseAnalytics.Param.ITEM_NAME, product_name.getText().toString());
-                mParam.putString( FirebaseAnalytics.Param.ITEM_CATEGORY, "Software/Analytics Tool");
-                mParam.putString( FirebaseAnalytics.Param.ITEM_BRAND, "Google");
-                mParam.putDouble( FirebaseAnalytics.Param.PRICE, 100000 );
-                mParam.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" );
-                mParam.putLong( FirebaseAnalytics.Param.INDEX, 1 );
+                // 7. Define Product Information
+                mParam.putString( FirebaseAnalytics.Param.ITEM_NAME, "Cart" + mProduct_name.getText().toString()); // Custom Name
+                mParam.putString( FirebaseAnalytics.Param.ITEM_CATEGORY, "Software/Analytics Tool"); // Product Category
+                mParam.putString( FirebaseAnalytics.Param.ITEM_BRAND, "Google"); // Product Brand
+                mParam.putDouble( FirebaseAnalytics.Param.PRICE, 100000 ); // Product Price
+                mParam.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" ); // Product Currency
+                mParam.putLong( FirebaseAnalytics.Param.INDEX, 1 ); // Product Private Index number
 
+                // 8-1. Multiple Items ...
                 ArrayList items = new ArrayList();
                 items.add(mParam);
 
-                ecommerceBundle.putParcelableArrayList("HotProduct", items);
+                // 8-2. Single Items ...
+                // mEcommerceBundle.putBundle( "HotProduct", mParam );
 
-                ecommerceBundle.putString( FirebaseAnalytics.Param.TRANSACTION_ID, product_name.getText().toString() );
-                ecommerceBundle.putString( FirebaseAnalytics.Param.AFFILIATION, "Super Store" );
-                ecommerceBundle.putDouble( FirebaseAnalytics.Param.VALUE, 100000 );
-                ecommerceBundle.putDouble( FirebaseAnalytics.Param.TAX, 10000 );
-                ecommerceBundle.putDouble( FirebaseAnalytics.Param.SHIPPING, 5 );
-                ecommerceBundle.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" );
-                ecommerceBundle.putString( FirebaseAnalytics.Param.COUPON, "SUMMER2017" );
+                mEcommerceBundle.putParcelableArrayList("HotProduct", items);
 
-                mFirebase.logEvent( FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, ecommerceBundle );
+                // 9. Record Ecommerce Product Information
+                mEcommerceBundle.putString( FirebaseAnalytics.Param.TRANSACTION_ID, mProduct_name.getText().toString() ); // Custom Product Name
+                mEcommerceBundle.putString( FirebaseAnalytics.Param.AFFILIATION, "Super Store" ); // Arriliation Store Name
+                mEcommerceBundle.putDouble( FirebaseAnalytics.Param.VALUE, 100000 ); // Product Price
+                mEcommerceBundle.putDouble( FirebaseAnalytics.Param.TAX, 10000 ); // Product Tax
+                mEcommerceBundle.putDouble( FirebaseAnalytics.Param.SHIPPING, 1 ); // Shipping Yes(1) / No(0)
+                mEcommerceBundle.putString( FirebaseAnalytics.Param.CURRENCY, "KRW" ); // Product currency
+                mEcommerceBundle.putString( FirebaseAnalytics.Param.COUPON, "SUMMER2017" ); // Product Coupon
 
-                Toast.makeText(getApplicationContext(), "결제가 완료 되었습니다.", Toast.LENGTH_LONG).show();
+                // 10. [Important] Record Log Event to your Analytics
+                mFirebaseAnalytics.logEvent( FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, mEcommerceBundle );
+
+                Toast.makeText(getApplicationContext(), "결제가 완료 되었습니다.", Toast.LENGTH_SHORT).show();
                 finish();
         }
     }
